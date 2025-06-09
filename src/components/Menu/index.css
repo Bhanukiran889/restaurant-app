@@ -1,0 +1,109 @@
+.menu-container {
+  padding: 12px;
+}
+
+.tabs {
+  display: flex;
+  overflow-x: auto;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.tab {
+  border: none;
+  background: none;
+  padding: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #000;
+  border-bottom: 2px solid transparent;
+}
+ul {
+  margin: 0;
+  padding: 0;
+}
+li {
+  list-style-type: none;
+}
+
+.tab.active {
+  color: #d23f57;
+  border-bottom: 2px solid #d23f57;
+}
+
+.dishes {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dish-card {
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid #eee;
+  padding: 12px;
+  border-radius: 6px;
+  background-color: #fff;
+}
+
+.dish-info {
+  flex: 1;
+}
+
+.veg-nonveg {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.veg {
+  background-color: green;
+}
+
+.nonveg {
+  background-color: red;
+}
+
+.price {
+  font-weight: bold;
+}
+
+.desc {
+  color: #888;
+}
+
+.calories {
+  color: orange;
+  font-weight: bold;
+}
+
+.count-controller {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.count-controller button {
+  background-color: green;
+  color: white;
+  border: none;
+  width: 30px;
+  height: 30px;
+  font-size: 18px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.custom {
+  color: blue;
+  text-decoration: underline;
+}
+
+.dish-img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+}
