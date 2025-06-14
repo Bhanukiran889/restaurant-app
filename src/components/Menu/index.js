@@ -1,4 +1,5 @@
 import {Component} from 'react'
+import CartContext from '../../context/CartContext'
 import Navbar from '../Navbar'
 import './index.css'
 
@@ -15,7 +16,6 @@ class Menu extends Component {
     activeTab: 0,
     counts: {},
     restaurantName: '',
-    cartCount: 0,
     apiStatus: apiStatusConstants.initial,
   }
 
@@ -51,18 +51,12 @@ class Menu extends Component {
     }
   }
 
-  updateCartCount = updatedCounts => {
-    const totalCount = Object.values(updatedCounts).reduce((a, b) => a + b, 0)
-    this.setState({cartCount: totalCount})
-  }
-
   handleIncrement = id => {
     this.setState(prevState => {
       const updatedCounts = {
         ...prevState.counts,
         [id]: (prevState.counts[id] || 0) + 1,
       }
-      this.updateCartCount(updatedCounts)
       return {counts: updatedCounts}
     })
   }
@@ -73,7 +67,6 @@ class Menu extends Component {
         ...prevState.counts,
         [id]: Math.max((prevState.counts[id] || 0) - 1, 0),
       }
-      this.updateCartCount(updatedCounts)
       return {counts: updatedCounts}
     })
   }
@@ -84,63 +77,90 @@ class Menu extends Component {
     const dishes = activeCategory?.category_dishes || []
 
     return (
-      <ul>
-        {dishes.map(dish => {
-          const quantity = counts[dish.dish_id] || 0
-          const isAvailable = dish.dish_Availability
+      <CartContext.Consumer>
+        {({addCartItem}) => (
+          <ul className="dish-list">
+            {dishes.map(dish => {
+              const quantity = counts[dish.dish_id] || 0
+              const isAvailable = dish.dish_Availability
 
-          return (
-            <li key={dish.dish_id} className="dish-card">
-              <div className="dish-info">
-                <span
-                  className={`veg-nonveg ${
-                    dish.dish_Type === 2 ? 'nonveg' : 'veg'
-                  }`}
-                  aria-label={dish.dish_Type === 2 ? 'Non-Veg' : 'Veg'}
-                />
-                <h1>{dish.dish_name}</h1>
-                <p>{`${dish.dish_currency} ${dish.dish_price}`}</p>
-                <p>{dish.dish_description}</p>
-                <p>{`${dish.dish_calories} calories`}</p>
+              const onAddToCart = () => {
+                const cartDish = {
+                  dish_id: dish.dish_id,
+                  dish_name: dish.dish_name,
+                  dish_image: dish.dish_image,
+                  dish_currency: dish.dish_currency,
+                  dish_price: dish.dish_price,
+                  dish_calories: dish.dish_calories,
+                  quantity,
+                }
+                addCartItem(cartDish)
+              }
 
-                {isAvailable ? (
-                  <div className="count-controller">
-                    <button
-                      type="button"
-                      onClick={() => this.handleDecrement(dish.dish_id)}
-                    >
-                      -
-                    </button>
-                    <p>{quantity}</p>
-                    <button
-                      type="button"
-                      onClick={() => this.handleIncrement(dish.dish_id)}
-                    >
-                      +
-                    </button>
+              return (
+                <li key={dish.dish_id} className="dish-card">
+                  <div className="dish-info">
+                    <span
+                      className={`veg-nonveg ${
+                        dish.dish_Type === 2 ? 'nonveg' : 'veg'
+                      }`}
+                      aria-label={dish.dish_Type === 2 ? 'Non-Veg' : 'Veg'}
+                    />
+                    <h1>{dish.dish_name}</h1>
+                    <p>{`${dish.dish_currency} ${dish.dish_price}`}</p>
+                    <p>{dish.dish_description}</p>
+                    <p>{`${dish.dish_calories} calories`}</p>
+
+                    {isAvailable ? (
+                      <div className="count-controller">
+                        <button
+                          type="button"
+                          onClick={() => this.handleDecrement(dish.dish_id)}
+                        >
+                          -
+                        </button>
+                        <p>{quantity}</p>
+                        <button
+                          type="button"
+                          onClick={() => this.handleIncrement(dish.dish_id)}
+                        >
+                          +
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="not-available">Not available</p>
+                    )}
+
+                    {isAvailable && quantity > 0 && (
+                      <button
+                        type="button"
+                        className="add-cart-btn"
+                        onClick={onAddToCart}
+                      >
+                        ADD TO CART
+                      </button>
+                    )}
+
+                    {dish.addonCat?.length > 0 && (
+                      <p className="custom">Customizations available</p>
+                    )}
                   </div>
-                ) : (
-                  <p className="not-available">Not available</p>
-                )}
-
-                {dish.addonCat?.length > 0 && (
-                  <p className="custom">Customizations available</p>
-                )}
-              </div>
-              <img
-                src={dish.dish_image}
-                alt={dish.dish_name}
-                className="dish-img"
-              />
-            </li>
-          )
-        })}
-      </ul>
+                  <img
+                    src={dish.dish_image}
+                    alt={dish.dish_name}
+                    className="dish-img"
+                  />
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </CartContext.Consumer>
     )
   }
 
   render() {
-    const {categories, activeTab, apiStatus, cartCount} = this.state
+    const {categories, activeTab, apiStatus} = this.state
 
     if (apiStatus === apiStatusConstants.inProgress) {
       return <p>Loading...</p>
@@ -152,7 +172,7 @@ class Menu extends Component {
 
     return (
       <div className="menu-container">
-        <Navbar cartCount={cartCount} />
+        <Navbar />
 
         <ul className="tabs" role="tablist">
           {categories.map((cat, idx) => (
@@ -173,7 +193,6 @@ class Menu extends Component {
           role="tabpanel"
           id={`panel-${activeTab}`}
           aria-labelledby={`tab-${activeTab}`}
-          className="dish-list"
         >
           {this.renderDishList()}
         </div>
